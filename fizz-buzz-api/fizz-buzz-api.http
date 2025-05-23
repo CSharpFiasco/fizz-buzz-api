@@ -1,0 +1,7 @@
+@fizz_buzz_api_HostAddress = http://localhost:5221
+
+POST {{fizz_buzz_api_HostAddress}}/
+Accept: application/json
+Content-Type: application/json
+{"multiples": [{ "multiple": 3, "wordToPrint": "Fizz" }, { "multiple": 5, "wordToPrint": "Buzz" }], "maxNumber": 16 }
+###
