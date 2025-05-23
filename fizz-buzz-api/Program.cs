@@ -1,4 +1,6 @@
+using fizz_buzz_api.CachePolicies;
 using FizzBuzz.Models;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,18 +9,26 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddProblemDetails();
+builder.Services.AddHealthChecks();
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("CachePost", PostCachePolicy.Instance);
+});
 
 var app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
+app.UseOutputCache();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
 
-app.MapGet("/", () => "Hello World!");
+// todo: setup probe for liveness and readiness
+app.MapHealthChecks("/healthz");
 
 app.MapPost("/", (FizzBuzzRequest request) => {
     foreach (var fizzBuzzItem in request.Multiples)
@@ -40,7 +50,6 @@ app.MapPost("/", (FizzBuzzRequest request) => {
     {
         return Results.Problem("MaxNumber must be greater than 0.", statusCode: 400);
     }
-
 
     var result = new Dictionary<int, string>();
 
@@ -68,7 +77,7 @@ app.MapPost("/", (FizzBuzzRequest request) => {
 
 
     return Results.Ok(result);
-});
+}).CacheOutput("CachePost");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
