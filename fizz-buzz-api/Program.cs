@@ -2,6 +2,7 @@ using fizz_buzz_api.CachePolicies;
 using FizzBuzz.Models;
 using Microsoft.Extensions.Options;
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -15,7 +16,22 @@ builder.Services.AddOutputCache(options =>
     options.AddPolicy("CachePost", PostCachePolicy.Instance);
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("https://fizz-buzz.carlosmartos.com")
+                                 .WithOrigins("http://localhost:4200")
+                                 .AllowAnyMethod()
+                                 .AllowAnyHeader()
+                          ;
+                      });
+});
+
 var app = builder.Build();
+
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
@@ -28,7 +44,7 @@ if (app.Environment.IsDevelopment())
 }
 
 // todo: setup probe for liveness and readiness
-app.MapHealthChecks("/healthz");
+app.MapHealthChecks("/");
 
 app.MapPost("/", (FizzBuzzRequest request) => {
     foreach (var fizzBuzzItem in request.Multiples)
