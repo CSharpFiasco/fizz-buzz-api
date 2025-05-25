@@ -1,15 +1,19 @@
 ﻿using FizzBuzz.Models;
 using FizzBuzz.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace FizzBuzz.Tests
 {
     public class FizzBuzzServiceTests
     {
         private IFizzBuzzService _service;
+        private readonly Mock<ILogger<FizzBuzzService>> _loggerMock;
         public FizzBuzzServiceTests()
         {
-            _service = new FizzBuzzService();
+            _loggerMock = new();
+            _service = new FizzBuzzService(_loggerMock.Object);
         }
 
         [Fact]
