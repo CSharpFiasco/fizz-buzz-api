@@ -119,15 +119,51 @@ namespace FizzBuzz.Tests
                 Multiples =
                 [
                     new FizzBuzzItem { Multiple = 3, WordToPrint = "Fizz" },
-                    new FizzBuzzItem { Multiple = 5, WordToPrint = "Buzz" }
+                    new FizzBuzzItem { Multiple = 5, WordToPrint = "Buzz" },
+                    new FizzBuzzItem { Multiple = 6, WordToPrint = "Bazz" }
                 ],
-                MaxNumber = 16
+                MaxNumber = 19
             };
             // Act
             var result = _service.Process(request);
             // Assert
             var okResult = Assert.IsType<Ok<ReadOnlyDictionary<int, string>>>(result);
             Assert.Equal(200, okResult.StatusCode);
+
+            var okBody = okResult.Value;
+            Assert.Collection(okBody, (item) =>
+            {
+                Assert.Equal(3, item.Key);
+                Assert.Equal("Fizz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(5, item.Key);
+                Assert.Equal("Buzz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(6, item.Key);
+                Assert.Equal("FizzBazz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(9, item.Key);
+                Assert.Equal("Fizz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(10, item.Key);
+                Assert.Equal("Buzz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(12, item.Key);
+                Assert.Equal("FizzBazz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(15, item.Key);
+                Assert.Equal("FizzBuzz", item.Value);
+            }, (item) =>
+            {
+                Assert.Equal(18, item.Key);
+                Assert.Equal("FizzBazz", item.Value);
+            });
         }
     }
 }

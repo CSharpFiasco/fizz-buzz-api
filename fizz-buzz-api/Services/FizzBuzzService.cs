@@ -1,4 +1,5 @@
 ﻿using FizzBuzz.Models;
+using System.Text;
 
 namespace FizzBuzz.Services;
 
@@ -85,20 +86,19 @@ public class FizzBuzzService : IFizzBuzzService
 
         var result = new Dictionary<int, string>();
 
-        var multiples = request.Multiples.ToDictionary(m => m.Multiple, m => m.WordToPrint);
         for (var i = 1; i <= maxNumber; i++)
         {
-            var fizzBuzzWord = string.Empty;
-            foreach (var (multiple, word) in multiples)
+            var fizzBuzzWordBuilder = new StringBuilder();
+            foreach (var item in request.Multiples)
             {
-                if (i % multiple == 0)
+                if (i % item.Multiple == 0)
                 {
-                    fizzBuzzWord += word;
+                    fizzBuzzWordBuilder.Append(item.WordToPrint);
                 }
             }
-            if (!string.IsNullOrEmpty(fizzBuzzWord))
+            if (fizzBuzzWordBuilder.Length > 0)
             {
-                result.Add(i, fizzBuzzWord);
+                result.Add(i, fizzBuzzWordBuilder.ToString());
             }
         }
 
