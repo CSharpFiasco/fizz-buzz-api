@@ -103,6 +103,6 @@ public class FizzBuzzService : IFizzBuzzService
         }
 
 
-        return Results.Ok(result);
+        return Results.Ok(result.AsReadOnly());
     }
 }

@@ -1,8 +1,13 @@
 using FizzBuzz.CachePolicies;
 using FizzBuzz.Models;
 using FizzBuzz.Services;
+using Microsoft.OpenApi.Any;
+using Microsoft.OpenApi.Models;
+using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Events;
+using System.Collections.ObjectModel;
+using System.Text.Json;
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +33,36 @@ builder.Services.AddSerilog(config =>
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => {
+    options.AddSchemaTransformer((schema, context, cancellationToken) =>
+    {
+        var type = context.JsonTypeInfo.Type;
+        if (type == typeof(FizzBuzzRequest))
+        {
+            schema.Example = new OpenApiString(JsonSerializer.Serialize(
+                new FizzBuzzRequest {
+                    MaxNumber = 100,
+                    Multiples = [
+                        new FizzBuzzItem {
+                            Multiple = 3,
+                            WordToPrint = "Fizz"
+                        },
+                        new FizzBuzzItem {
+                            Multiple = 5,
+                            WordToPrint = "Buzz"
+                        },
+                    ]
+                }
+                , JsonSerializerOptions.Web));
+        }
+
+        if (type == typeof(ReadOnlyDictionary<int, string>)) {
+            schema.Example = new OpenApiString(JsonSerializer.Serialize(new Dictionary<int, string> { { 3, "Fizz" } }));
+        }
+
+        return Task.CompletedTask;
+    });
+});
 
 builder.Services.AddProblemDetails();
 builder.Services.AddHealthChecks();
@@ -72,13 +106,12 @@ app.MapHealthChecks("/");
 app.MapPost("/", (FizzBuzzRequest request, IFizzBuzzService service) =>
 {
     return service.Process(request);
-}).CacheOutput("CachePost");
+}).CacheOutput("CachePost")
+.Produces<ReadOnlyDictionary<int, string>>(StatusCodes.Status200OK)
+.ProducesProblem(StatusCodes.Status400BadRequest);
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.UseHttpsRedirection();
 

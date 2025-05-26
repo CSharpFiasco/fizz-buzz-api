@@ -3,6 +3,7 @@ using FizzBuzz.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Collections.ObjectModel;
 
 namespace FizzBuzz.Tests
 {
@@ -125,7 +126,7 @@ namespace FizzBuzz.Tests
             // Act
             var result = _service.Process(request);
             // Assert
-            var okResult = Assert.IsType<Ok<Dictionary<int, string>>>(result);
+            var okResult = Assert.IsType<Ok<ReadOnlyDictionary<int, string>>>(result);
             Assert.Equal(200, okResult.StatusCode);
         }
     }
