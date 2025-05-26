@@ -57,7 +57,7 @@ builder.Services.AddOpenApi(options => {
         }
 
         if (type == typeof(ReadOnlyDictionary<int, string>)) {
-            schema.Example = new OpenApiString(JsonSerializer.Serialize(new Dictionary<int, string> { { 3, "Fizz" } }));
+            schema.Example = new OpenApiString(JsonSerializer.Serialize(new Dictionary<int, string> { { 3, "Example" } }));
         }
 
         return Task.CompletedTask;
